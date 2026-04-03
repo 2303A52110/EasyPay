@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>EasyPay — Smart UPI Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- SMS POPUP -->
+<div class="sms-popup" id="sms-popup">
+  <div class="sms-popup-head">
+    <div class="sms-app-ic">💳</div>
+    <div><div class="sms-app-name">EasyPay Alerts</div></div>
+    <div class="sms-time" id="sms-time">Now</div>
+  </div>
+  <div class="sms-popup-body">
+    <div class="sms-title" id="sms-title">UPI Transaction Alert</div>
+    <div class="sms-text" id="sms-text">Loading...</div>
+  </div>
+</div>
+
+<!-- TRANSACTION SUCCESS POPUP -->
+<div id="txn-popup-overlay">
+  <div class="txn-popup-box">
+    <div class="txn-popup-header" id="txn-pop-header">
+      <div class="txn-popup-icon" id="txn-pop-icon">✅</div>
+      <div class="txn-popup-status" id="txn-pop-status">Payment Successful!</div>
+      <div class="txn-popup-amount" id="txn-pop-amount">₹0</div>
+      <div class="txn-popup-to" id="txn-pop-to">—</div>
+    </div>
+    <div class="txn-popup-body" id="txn-pop-body"></div>
+    <div class="txn-popup-footer">
+      <button class="txn-pop-btn-close" onclick="closeTxnPopup()">✕ Close</button>
+      <button class="txn-pop-btn-ok" onclick="closeTxnPopup()">Done 👍</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-logo">Easy<span>Pay</span></div>
+  <div class="sp-tag">Your Smart UPI Wallet</div>
+  <div class="sp-bar"><div class="sp-fill"></div></div>
+</div>
+
+<!-- AUTH -->
+<div id="auth">
+  <div class="auth-box">
+    <div class="auth-brand">💸 EasyPay</div>
+
+    <!-- REGISTER -->
+    <div class="pnl on" id="pnl-reg">
+      <h2>Create Account</h2>
+      <p class="sub">Join EasyPay — India's smartest UPI app</p>
+      <div class="r2">
+        <div class="fg"><label>First Name *</label><input id="r-fname" type="text" placeholder="Enter First Name"/></div>
+        <div class="fg"><label>Last Name</label><input id="r-lname" type="text" placeholder="Enter Last Name"/></div>
+      </div>
+      <div class="fg"><label>Mobile Number *</label><input id="r-phone" type="tel" placeholder="10-digit number" maxlength="10"/></div>
+      <div class="fg"><label>Date of Birth *</label><input id="r-dob" type="date"/></div>
+      <div class="r2">
+        <div class="fg"><label>City</label><input id="r-city" type="text" placeholder=""/></div>
+        <div class="fg"><label>Email</label><input id="r-email" type="email" placeholder=""/></div>
+      </div>
+      <div class="fg"><label>Bank *</label>
+        <select id="r-bank">
+          <option value="">Select Bank</option>
+          <option>SBI</option><option>HDFC</option><option>ICICI</option>
+          <option>Axis</option><option>Kotak</option><option>PNB</option>
+          <option>Canara</option><option>BOB</option><option>IndusInd</option>
+        </select>
+      </div>
+      <div class="fg"><label>Set 6-digit MPIN *</label><div class="orow" id="mpin-row"></div></div>
+      <div class="fg"><label>Confirm MPIN *</label><div class="orow" id="mconf-row"></div></div>
+      <button class="btn-p" onclick="doRegister()">Create Account →</button>
+      <div class="sw">Already have an account? <a onclick="swPnl('pnl-login')">Login here</a></div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="pnl" id="pnl-login">
+      <h2>Welcome Back!</h2>
+      <p class="sub">Login to your EasyPay account</p>
+      <div class="fg"><label>Mobile Number</label><input id="l-phone" type="tel" placeholder="Registered mobile number" maxlength="10"/></div>
+
+      <!-- FINGERPRINT LOGIN -->
+      <div class="fp-wrap" onclick="fpLogin()" id="fp-login-wrap">
+        <div class="fp-ring" id="fp-ring-login">
+          <svg class="fp-svg" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="27" fill="none" stroke="#e5e7eb" stroke-width="2"/>
+            <path d="M30 14c-8.8 0-16 7.2-16 16 0 5.3 2.6 10 6.6 12.9" fill="none" stroke-width="2.5" stroke-dasharray="100" stroke-dashoffset="100" class="fp-arc" id="arc-login" stroke="var(--p)"/>
+            <text x="30" y="34" text-anchor="middle" font-size="18" fill="var(--p)">👆</text>
+          </svg>
+        </div>
+        <div class="fp-lbl">Touch to Login with Fingerprint</div>
+        <div class="fp-sub">Enter mobile number first, then touch</div>
+      </div>
+      <div class="divider">or use MPIN</div>
+      <div class="fg"><label>Enter MPIN (6 digits)</label><div class="orow" id="mpin-row-login"></div></div>
+      <button class="btn-p" onclick="doLogin()">Login →</button>
+      <div class="sw">New user? <a onclick="swPnl('pnl-reg')">Register here</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="h">
+  <div class="mobile-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <div id="sb">
+    <div class="sb-brand"><div class="sb-brand-logo">💸 EasyPay</div></div>
+    <div id="sb-nav"></div>
+    <div class="sb-user">
+      <div class="sb-user-name" id="sb-uname">—</div>
+      <div class="sb-user-upi" id="sb-uupi">—</div>
+      <div class="sb-lo" onclick="doLogout()">🚪 Logout</div>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+    <div id="topbar">
+      <button id="ham" onclick="toggleSidebar()">☰</button>
+      <div id="topbar-title">Dashboard</div>
+      <div id="topbar-bal">₹—</div>
+      <button id="bell-btn" onclick="showBellToast()"><span>🔔</span><div class="bdot" id="bdot"></div></button>
+    </div>
+
+    <div id="main">
+
+      <!-- HOME -->
+      <div id="pg-home" class="pg">
+        <div class="hero">
+          <button class="hero-eye" onclick="toggleBalVis()">👁</button>
+          <div class="hero-greet" id="hgreet">Good morning! 👋</div>
+          <div class="hero-name" id="hname">—</div>
+          <div class="hero-bal-label">AVAILABLE BALANCE</div>
+          <div class="hero-bal" id="hbal">₹—</div>
+          <div class="hero-upi" id="hupi">UPI: —</div>
+        </div>
+        <div class="quick-grid">
+          <div class="qa" onclick="showPage('send')"><div class="qa-ic" style="background:#f3e8ff;color:#5f259f">📤</div><div class="qa-label">Send Money</div></div>
+          <div class="qa" onclick="showPage('scanner')"><div class="qa-ic" style="background:#dbeafe;color:#1d4ed8">📷</div><div class="qa-label">Scan & Pay</div></div>
+          <div class="qa" onclick="showPage('recharge')"><div class="qa-ic" style="background:#dcfce7;color:#16a34a">📱</div><div class="qa-label">Recharge</div></div>
+          <div class="qa" onclick="showPage('bills')"><div class="qa-ic" style="background:#fef3c7;color:#d97706">⚡</div><div class="qa-label">Pay Bills</div></div>
+          <div class="qa" onclick="showPage('history')"><div class="qa-ic" style="background:#ffe4e6;color:#e11d48">📋</div><div class="qa-label">History</div></div>
+          <div class="qa" onclick="showPage('chat')"><div class="qa-ic" style="background:#e0f2fe;color:#0284c7">💬</div><div class="qa-label">Chat Pay</div></div>
+          <div class="qa" onclick="showPage('balance')"><div class="qa-ic" style="background:#f0fdf4;color:#15803d">💳</div><div class="qa-label">Balance</div></div>
+          <div class="qa" onclick="showPage('ai')"><div class="qa-ic" style="background:#fdf4ff;color:#a21caf">🪄</div><div class="qa-label">EasyAI</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Recent Transactions</div>
+          <div id="home-txns"></div>
+        </div>
+      </div>
+
+      <!-- SEND -->
+      <div id="pg-send" class="pg">
+        <div class="tabs">
+          <div class="tab on" data-stab onclick="switchSendTab(this,'contacts')">👥 Contacts</div>
+          <div class="tab" data-stab onclick="switchSendTab(this,'phone')">📱 Mobile No.</div>
+          <div class="tab" data-stab onclick="switchSendTab(this,'upi')">🔗 UPI ID</div>
+        </div>
+        <div id="stpnl-contacts" class="stpnl">
+          <input class="search-inp" id="send-srch" placeholder="🔍 Search contacts by name or UPI..." oninput="renderSendList(this.value)"/>
+          <div id="send-list"></div>
+        </div>
+        <div id="stpnl-phone" class="stpnl" style="display:none">
+          <div class="card">
+            <div class="card-title">📱 Pay via Mobile Number</div>
+            <div class="fg"><label>Mobile Number</label><input id="pt-phone" type="tel" placeholder="Enter 10-digit number" maxlength="10"/></div>
+            <button class="btn-p" onclick="phoneFind()">Find User →</button>
+            <div class="found-card" id="pt-found-card">
+              <div class="found-top">
+                <div class="found-av" id="pt-av">?</div>
+                <div><div class="found-name" id="pt-name">—</div><div class="found-upi" id="pt-upi">—</div></div>
+                <div class="found-badge">✓ Found</div>
+              </div>
+              <div class="fg"><label>Amount (₹)</label><input id="pt-amt" type="number" placeholder="Enter amount" min="1"/></div>
+              <div class="fg"><label>Note</label><input id="pt-note" type="text" placeholder="e.g. Dinner, rent..."/></div>
+              <button class="btn-p" onclick="phonePay()">Pay Now 🔒</button>
+            </div>
+          </div>
+        </div>
+        <div id="stpnl-upi" class="stpnl" style="display:none">
+          <div class="card">
+            <div class="card-title">🔗 Pay via UPI ID</div>
+            <div class="fg"><label>UPI ID</label><input id="upi-id-inp" type="text" placeholder="e.g. name@upi or 9876543210@ybl"/></div>
+            <button class="btn-p" onclick="upiFind()">Verify UPI ID →</button>
+            <div class="found-card" id="upi-found-card">
+              <div class="found-top">
+                <div class="found-av" id="upi-av">?</div>
+                <div><div class="found-name" id="upi-name">—</div><div class="found-upi" id="upi-upi">—</div></div>
+                <div class="found-badge">✓ Verified</div>
+              </div>
+              <div class="fg"><label>Amount (₹)</label><input id="upi-amt" type="number" placeholder="Enter amount" min="1"/></div>
+              <div class="fg"><label>Note</label><input id="upi-note" type="text" placeholder="What's this for?"/></div>
+              <button class="btn-p" onclick="upiPay()">Pay Now 🔒</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCANNER -->
+      <div id="pg-scanner" class="pg">
+        <div class="card">
+          <div class="card-title">📷 Scan QR Code</div>
+          <div class="qr-box">
+            <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
+            <div class="qr-corner bl"></div><div class="qr-corner br"></div>
+            <div class="qr-scan-line"></div>
+            <div class="qr-placeholder">📸<br>Point camera at QR code<br><br>
+              <small style="font-size:.72rem;opacity:.6">Simulated QR below</small></div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">
+            <button class="op-tab" onclick="simScan('phonePe')">🟣 PhonePe QR</button>
+            <button class="op-tab" onclick="simScan('gpay')">🔵 GPay QR</button>
+            <button class="op-tab" onclick="simScan('other')">⚪ Other QR</button>
+          </div>
+          <div class="scan-result" id="sr-card">
+            <div class="sr-badge" id="sr-badge">—</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div class="found-av" id="sr-av" style="width:44px;height:44px;font-size:1rem">?</div>
+              <div><div class="found-name" id="sr-name">—</div><div class="found-upi" id="sr-upi">—</div></div>
+            </div>
+            <div class="fg"><label>Amount (₹)</label><input id="sr-amt" type="number" placeholder="Enter amount" min="1" oninput="document.getElementById('sr-pay-amt').textContent=this.value||'—'"/></div>
+            <div class="quick-amts">
+              <div class="qa-chip" onclick="document.getElementById('sr-amt').value=100;document.getElementById('sr-pay-amt').textContent=100">₹100</div>
+              <div class="qa-chip" onclick="document.getElementById('sr-amt').value=200;document.getElementById('sr-pay-amt').textContent=200">₹200</div>
+              <div class="qa-chip" onclick="document.getElementById('sr-amt').value=500;document.getElementById('sr-pay-amt').textContent=500">₹500</div>
+              <div class="qa-chip" onclick="document.getElementById('sr-amt').value=1000;document.getElementById('sr-pay-amt').textContent=1000">₹1000</div>
+            </div>
+            <button class="btn-p" onclick="scanPay()">Pay ₹<span id="sr-pay-amt">—</span> →</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">📱 Pay via Mobile Number</div>
+          <div class="fg"><label>Mobile Number</label><input id="shop-phone" type="tel" placeholder="10-digit number" maxlength="10"/></div>
+          <button class="btn-p" onclick="shopFind()">Find & Pay →</button>
+          <div class="found-card" id="shop-found-card">
+            <div class="found-top">
+              <div class="found-av" id="shop-av">?</div>
+              <div><div class="found-name" id="shop-name">—</div><div class="found-upi" id="shop-upi">—</div></div>
+              <div class="found-badge">✓ Found</div>
+            </div>
+            <div class="fg"><label>Amount (₹)</label><input id="shop-amt" type="number" placeholder="Enter amount" min="1"/></div>
+            <div class="fg"><label>Note</label><input id="shop-note" type="text" placeholder="e.g. Auto fare, Tea..."/></div>
+            <button class="btn-p" onclick="shopPay()">Pay Now 🔒</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY — Crystal Clear -->
+      <div id="pg-history" class="pg">
+        <!-- Summary Cards -->
+        <div class="hist-summary">
+          <div class="hscard cr">
+            <div class="hscard-icon"></div>
+            <div class="hscard-info">
+              <div class="hscard-lbl">Total Received</div>
+              <div class="hscard-amt" id="hist-recv">₹0.00</div>
+              <div class="hscard-count" id="hist-recv-count">0 transactions</div>
+            </div>
+          </div>
+          <div class="hscard db">
+            <div class="hscard-icon"></div>
+            <div class="hscard-info">
+              <div class="hscard-lbl">Total Sent</div>
+              <div class="hscard-amt" id="hist-sent">₹0.00</div>
+              <div class="hscard-count" id="hist-sent-count">0 transactions</div>
+            </div>
+          </div>
+        </div>
+        <!-- Filter Tabs -->
+        <div class="hist-filter-bar">
+          <button class="hf on" onclick="filterHistory('all',this)">All</button>
+          <button class="hf" onclick="filterHistory('credit',this)">➕ Received</button>
+          <button class="hf" onclick="filterHistory('debit',this)">➖ Sent</button>
+          <button class="hf" onclick="filterHistory('today',this)">Today</button>
+          <button class="hf" onclick="filterHistory('week',this)">This Week</button>
+        </div>
+        <!-- Transaction List -->
+        <div id="hist-list-wrap"></div>
+      </div>
+
+      <!-- CHAT -->
+      <div id="pg-chat" class="pg" style="padding:0">
+        <div id="chat-list-view">
+          <div style="padding:14px 18px 0">
+            <div class="card-title" style="margin-bottom:8px">Chats</div>
+            <input class="search-inp" id="chat-srch" placeholder="🔍 Search contacts..." oninput="renderChatList(this.value)"/>
+          </div>
+          <div id="chat-cl"></div>
+        </div>
+        <div id="chat-thread">
+          <div class="ct-head">
+            <button onclick="closeChatThread()" style="color:var(--txs);padding:4px">←</button>
+            <div class="ct-av" id="ct-av">?</div>
+            <div><div class="ct-name" id="ct-name">—</div><div class="ct-status">● Online</div></div>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="ct-act-btn" onclick="openPayFromChat()">💳 Pay</button>
+              <button class="ct-act-btn" onclick="openReqFromChat()">💰 Request</button>
+            </div>
+          </div>
+          <div id="ct-msgs" class="ct-msgs"></div>
+          <div class="ct-actions">
+            <div class="ct-act-btn" onclick="chatQuickReq(100)">₹100</div>
+            <div class="ct-act-btn" onclick="chatQuickReq(200)">₹200</div>
+            <div class="ct-act-btn" onclick="chatQuickReq(500)">₹500</div>
+            <div class="ct-act-btn" onclick="chatQuickReq(1000)">₹1000</div>
+          </div>
+          <div class="ct-input-row">
+            <input class="ct-inp" id="ct-inp" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()"/>
+            <button class="ct-send-btn" onclick="sendChat()">➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BALANCE -->
+      <div id="pg-balance" class="pg">
+        <div class="bal-hero">
+          <div style="font-size:.72rem;color:rgba(255,255,255,.6);font-weight:600;letter-spacing:.5px">CURRENT BALANCE</div>
+          <div class="bal-amt" id="bal-amt">₹—</div>
+          <div class="bal-asof" id="bal-asof">—</div>
+          <div class="bal-details">
+            <div class="bdet"><div class="bdet-lbl">Total Received</div><div class="bdet-val cr" id="bal-recv">₹0</div><div class="bdet-count" id="bal-recv-c">0 txns</div></div>
+            <div class="bdet"><div class="bdet-lbl">Total Sent</div><div class="bdet-val db" id="bal-sent">₹0</div><div class="bdet-count" id="bal-sent-c">0 txns</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Account Details</div>
+          <div class="sett-row"><span class="sett-lbl">Name</span><span style="font-weight:700;font-size:.9rem" id="bal-uname">—</span></div>
+          <div class="sett-row"><span class="sett-lbl">Mobile</span><span style="font-weight:700;font-size:.9rem;font-family:var(--mono)" id="bal-umob">—</span></div>
+          <div class="sett-row"><span class="sett-lbl">UPI ID</span><span style="font-weight:700;font-size:.8rem;font-family:var(--mono);color:var(--p)" id="bal-uupi">—</span></div>
+          <div class="sett-row"><span class="sett-lbl">Bank</span><span style="font-weight:700;font-size:.9rem" id="bal-ubank">—</span></div>
+          <div class="sett-row"><span class="sett-lbl">Account No.</span><span style="font-weight:700;font-size:.8rem;font-family:var(--mono)" id="bal-uacc">—</span></div>
+        </div>
+        <button class="btn-p" onclick="downloadStatement()">📥 Download Statement</button>
+      </div>
+
+      <!-- RECHARGE -->
+      <div id="pg-recharge" class="pg">
+        <div class="tabs">
+          <div class="tab on" onclick="switchRcTab(this,'mobile')">📱 Mobile</div>
+          <div class="tab" onclick="switchRcTab(this,'dth')">📡 DTH</div>
+          <div class="tab" onclick="switchRcTab(this,'data')">🌐 Data</div>
+        </div>
+        <div id="rc-mobile-pnl">
+          <div class="card">
+            <div class="fg"><label>Mobile Number</label><input id="rc-phone" type="tel" placeholder="Enter mobile number" maxlength="10"/></div>
+            <div class="op-tabs" id="rc-ops">
+              <div class="op-tab on" onclick="rcOp(this,'Airtel')">Airtel</div>
+              <div class="op-tab" onclick="rcOp(this,'Jio')">Jio</div>
+              <div class="op-tab" onclick="rcOp(this,'Vi')">Vi</div>
+              <div class="op-tab" onclick="rcOp(this,'BSNL')">BSNL</div>
+            </div>
+            <div class="pack-grid" id="rc-packs"></div>
+            <div class="fg"><label>Custom Amount</label><input id="rc-custom" type="number" placeholder="Enter custom amount"/></div>
+            <button class="btn-p" onclick="doRecharge('mobile')">Recharge Now →</button>
+          </div>
+        </div>
+        <div id="rc-dth-pnl" style="display:none">
+          <div class="card">
+            <div class="fg"><label>Subscriber ID</label><input id="rc-dth-id" type="text" placeholder="DTH subscriber ID"/></div>
+            <div class="op-tabs" id="rc-dth-ops">
+              <div class="op-tab on" onclick="dthOp(this,'Tata Play')">Tata Play</div>
+              <div class="op-tab" onclick="dthOp(this,'Dish TV')">Dish TV</div>
+              <div class="op-tab" onclick="dthOp(this,'D2H')">D2H</div>
+              <div class="op-tab" onclick="dthOp(this,'Airtel DTH')">Airtel DTH</div>
+            </div>
+            <div class="pack-grid" id="dth-packs"></div>
+            <button class="btn-p" onclick="doRecharge('dth')">Recharge →</button>
+          </div>
+        </div>
+        <div id="rc-data-pnl" style="display:none">
+          <div class="card">
+            <div class="fg"><label>Mobile Number</label><input id="rc-data-num" type="tel" placeholder="Enter mobile number"/></div>
+            <div class="op-tabs" id="rc-data-ops">
+              <div class="op-tab on" onclick="dataOp(this,'Airtel')">Airtel</div>
+              <div class="op-tab" onclick="dataOp(this,'Jio')">Jio</div>
+              <div class="op-tab" onclick="dataOp(this,'BSNL')">BSNL</div>
+            </div>
+            <div class="pack-grid" id="data-packs"></div>
+            <button class="btn-p" onclick="doRecharge('data')">Get Data →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BILLS -->
+      <div id="pg-bills" class="pg">
+        <div id="bill-cat-view">
+          <div class="bill-grid">
+            <div class="bill-ic" onclick="openBill('electricity')"><div class="bill-ic-em">⚡</div><div class="bill-ic-lbl">Electricity</div></div>
+            <div class="bill-ic" onclick="openBill('water')"><div class="bill-ic-em">💧</div><div class="bill-ic-lbl">Water</div></div>
+            <div class="bill-ic" onclick="openBill('gas')"><div class="bill-ic-em">🔥</div><div class="bill-ic-lbl">Gas</div></div>
+            <div class="bill-ic" onclick="openBill('broadband')"><div class="bill-ic-em">🌐</div><div class="bill-ic-lbl">Broadband</div></div>
+            <div class="bill-ic" onclick="openBill('dth')"><div class="bill-ic-em">📡</div><div class="bill-ic-lbl">DTH</div></div>
+            <div class="bill-ic" onclick="openBill('ott')"><div class="bill-ic-em">🎬</div><div class="bill-ic-lbl">OTT</div></div>
+            <div class="bill-ic" onclick="openBill('fastag')"><div class="bill-ic-em">🚗</div><div class="bill-ic-lbl">FASTag</div></div>
+            <div class="bill-ic" onclick="openBill('rent')"><div class="bill-ic-em">🏠</div><div class="bill-ic-lbl">Rent</div></div>
+            <div class="bill-ic" onclick="openBill('lpg')"><div class="bill-ic-em">🛢️</div><div class="bill-ic-lbl">LPG</div></div>
+          </div>
+        </div>
+        <div id="bill-form-view" style="display:none">
+          <div class="card">
+            <button class="btn-g" style="text-align:left;margin-bottom:12px;color:var(--p);font-weight:700" onclick="closeBillForm()">← Back</button>
+            <div style="text-align:center;font-size:1.8rem;margin-bottom:6px" id="bf-ic"></div>
+            <div style="text-align:center;font-weight:800;font-size:1rem;margin-bottom:4px" id="bf-title">—</div>
+            <div style="text-align:center;color:var(--txs);font-size:.82rem;margin-bottom:16px" id="bf-sub">—</div>
+            <div class="fg"><label id="bf-prov-lbl">Provider</label><select id="bf-provider"></select></div>
+            <div class="fg"><label id="bf-id-lbl">Consumer Number</label><input id="bf-consumer" type="text" placeholder="Enter your consumer number"/></div>
+            <button class="btn-s" onclick="fetchBill()">🔍 Fetch Bill Details</button>
+            <div id="bf-result" style="display:none;background:#f9fafb;border-radius:var(--rsm);padding:14px;margin:10px 0;border:1px solid var(--bdr)">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.78rem;font-weight:600;color:var(--txs)">Amount Due</span><span style="font-size:1.1rem;font-weight:800;color:var(--err);font-family:var(--mono)" id="bf-amount">—</span></div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:.76rem;color:var(--txs)">Due Date</span><span style="font-size:.82rem;font-weight:700" id="bf-due">—</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="font-size:.76rem;color:var(--txs)">Bill Period</span><span style="font-size:.82rem;font-weight:700" id="bf-period">—</span></div>
+            </div>
+            <button class="btn-p" id="bf-pay-btn" style="display:none" onclick="payBill()">Pay Bill 🔒</button>
+            <div id="bf-success" style="display:none;text-align:center;padding:18px;background:var(--okl);border-radius:var(--rsm)">
+              <div style="font-size:1.5rem">✅</div>
+              <div style="font-weight:800;color:var(--ok);margin-top:6px" id="bf-success-msg">Bill paid!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SERVICES -->
+      <div id="pg-services" class="pg">
+        <div class="svc-grid">
+          <div class="svc-ic" onclick="openService('insurance','🛡️','Insurance','Policy Number','Provider')"><div class="svc-em">🛡️</div><div><div class="svc-name">Insurance</div><div class="svc-sub">Pay premium</div></div></div>
+          <div class="svc-ic" onclick="openService('emi','🏦','Loan EMI','Loan Account No.','Bank/NBFC')"><div class="svc-em">🏦</div><div><div class="svc-name">Loan EMI</div><div class="svc-sub">Pay instalment</div></div></div>
+          <div class="svc-ic" onclick="openService('mutual','📈','Mutual Fund','Folio Number','AMC')"><div class="svc-em">📈</div><div><div class="svc-name">Mutual Fund</div><div class="svc-sub">SIP payment</div></div></div>
+          <div class="svc-ic" onclick="openService('education','🎓','Education Fee','Student ID','Institution')"><div class="svc-em">🎓</div><div><div class="svc-name">Education</div><div class="svc-sub">Pay fees</div></div></div>
+        </div>
+        <div id="svc-form-view" style="display:none">
+          <div class="card">
+            <button class="btn-g" style="text-align:left;margin-bottom:12px;color:var(--p);font-weight:700" onclick="closeSvcForm()">← Back</button>
+            <div style="text-align:center;font-size:1.8rem;margin-bottom:6px" id="sf-ic"></div>
+            <div style="text-align:center;font-weight:800;font-size:1rem;margin-bottom:16px" id="sf-title">—</div>
+            <div class="fg"><label id="sf-prov-lbl">Provider</label><input id="sf-provider" type="text" placeholder="Enter provider name"/></div>
+            <div class="fg"><label id="sf-id-lbl">Account ID</label><input id="sf-account-id" type="text" placeholder="Enter account/policy number"/></div>
+            <div class="fg"><label>Amount (₹)</label><input id="sf-amt" type="number" placeholder="Enter amount" min="1"/></div>
+            <div class="fg"><label>Note (optional)</label><input id="sf-note" type="text" placeholder="Payment reference..."/></div>
+            <button class="btn-p" id="sf-pay-btn" onclick="payService()">Pay Now 🔒</button>
+            <div id="sf-success" style="display:none;text-align:center;padding:18px;background:var(--okl);border-radius:var(--rsm)">
+              <div style="font-size:1.5rem">✅</div>
+              <div style="font-weight:800;color:var(--ok);margin-top:6px" id="sf-success-msg">Payment done!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI -->
+      <div id="pg-ai" class="pg">
+        <div class="card">
+          <div class="card-title">🪄 EasyAI — Your Money Assistant</div>
+          <div class="ai-quick">
+            <div class="ai-q" onclick="aiAsk('What is my balance?')">💰 My Balance</div>
+            <div class="ai-q" onclick="aiAsk('Show my recent transactions')">📋 Recent Txns</div>
+            <div class="ai-q" onclick="aiAsk('How much did I spend this month?')">📊 Monthly Spend</div>
+            <div class="ai-q" onclick="aiAsk('Any savings tips for me?')">💡 Save Tips</div>
+          </div>
+          <div class="ai-msgs" id="ai-msgs"></div>
+          <div class="ai-input-row">
+            <input class="ai-inp" id="ai-inp" placeholder="Ask in Telugu, Hindi or English..." onkeydown="if(event.key==='Enter')sendAI()"/>
+            <button class="ai-send" id="ai-send" onclick="sendAI()">➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="pg-settings" class="pg">
+        <div class="card">
+          <div class="card-title">Profile</div>
+          <div class="fg"><label>Full Name</label><input id="s-name" type="text"/></div>
+          <div class="fg"><label>Email</label><input id="s-email" type="email"/></div>
+          <button class="btn-p" onclick="saveProfile()">Save Profile</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Security</div>
+          <!-- FINGERPRINT SECTION -->
+          <div class="fp-settings-wrap">
+            <div class="fp-settings-top">
+              <div>
+                <div class="sett-lbl">👆 Fingerprint / Face ID</div>
+                <div class="sett-sub" id="fp-status-text">Not setup</div>
+              </div>
+              <button class="btn-fp-setup" onclick="setupFingerprint()" id="fp-setup-btn">Setup</button>
+            </div>
+            <div class="fp-info-box" id="fp-info-box">
+              <div class="fp-info-title">How to enable Fingerprint Login</div>
+              <div class="fp-info-steps">
+                <div class="fp-step"><span class="fp-step-n">1</span>Login with MPIN first (already done ✓)</div>
+                <div class="fp-step"><span class="fp-step-n">2</span>Tap <strong>Setup</strong> and touch fingerprint sensor</div>
+                <div class="fp-step"><span class="fp-step-n">3</span>On login page, tap the 👆 icon to use fingerprint</div>
+                <div class="fp-step"><span class="fp-step-n">4</span>During payment, tap 👆 instead of entering MPIN</div>
+              </div>
+              <div class="fp-note">⚠️ Requires biometric sensor (Android Chrome / iOS Safari)</div>
+            </div>
+          </div>
+          <div class="sett-row" style="border-top:1px solid #f3f4f6;margin-top:10px;padding-top:14px">
+            <div><div class="sett-lbl">Change MPIN</div><div class="sett-sub">Update your 6-digit MPIN</div></div>
+            <button class="btn-s" style="width:auto;padding:8px 16px" onclick="openMpinChange()">Change</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">About</div>
+          <div class="sett-row"><div class="sett-lbl">App Version</div><div style="font-weight:600;font-size:.85rem;font-family:var(--mono)">EasyPay 4.0</div></div>
+          <div class="sett-row"><div class="sett-lbl">UPI ID</div><div style="font-weight:600;font-size:.82rem;font-family:var(--mono);color:var(--p)" id="s-upi-display">—</div></div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div>
+</div><!-- /app -->
+
+<!-- PAY MODAL -->
+<div class="modal-overlay" id="mod-pay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Send Money</div>
+      <button class="modal-close" onclick="closeMod('mod-pay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pm-contact">
+        <div class="pm-av" id="pm-av">?</div>
+        <div>
+          <div class="pm-name" id="pm-name">—</div>
+          <div class="pm-upi" id="pm-upi">—</div>
+          <div class="pm-phone" id="pm-phone">—</div>
+        </div>
+      </div>
+      <div class="fg"><label>Amount (₹)</label>
+        <input id="pay-amt" type="number" placeholder="0" min="1" oninput="document.getElementById('pay-amt-disp').textContent=this.value?'₹'+this.value:'₹0'"/>
+      </div>
+      <div class="amt-disp" id="pay-amt-disp">₹0</div>
+      <div class="quick-amts">
+        <div class="qa-chip" onclick="setPayAmt(100)">₹100</div>
+        <div class="qa-chip" onclick="setPayAmt(200)">₹200</div>
+        <div class="qa-chip" onclick="setPayAmt(500)">₹500</div>
+        <div class="qa-chip" onclick="setPayAmt(1000)">₹1,000</div>
+        <div class="qa-chip" onclick="setPayAmt(2000)">₹2,000</div>
+      </div>
+      <div class="fg"><label>Note (optional)</label><input id="pay-note" type="text" placeholder="What's this for?"/></div>
+      <button class="btn-p" onclick="confirmPayModal()">Proceed to Pay 🔒</button>
+    </div>
+  </div>
+</div>
+
+<!-- MPIN CONFIRM MODAL — FIXED PIN ENTRY -->
+<div class="modal-overlay" id="mod-mpin">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Confirm Payment</div>
+      <button class="modal-close" onclick="closeMod('mod-mpin')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pay-to-info">
+        <div style="font-size:.7rem;color:var(--txs);font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">PAYING TO</div>
+        <div style="font-weight:800;font-size:1rem" id="mpin-to-name">—</div>
+        <div style="font-size:1.6rem;font-weight:900;font-family:var(--mono);color:var(--p);margin-top:6px" id="mpin-amt-disp">₹0</div>
+      </div>
+
+      <!-- FINGERPRINT OPTION -->
+      <div class="fp-pay-section" onclick="fpPayConfirm()">
+        <div class="fp-ring" id="fp-ring-pay">
+          <span style="font-size:1.6rem">👆</span>
+        </div>
+        <div style="font-size:.82rem;font-weight:700;color:var(--p)">Touch Fingerprint to Pay</div>
+        <div style="font-size:.72rem;color:var(--txs)">or enter MPIN below</div>
+      </div>
+
+      <!-- PIN DOTS DISPLAY — read-only indicators -->
+      <div class="pin-dots-row" id="pin-dots-row">
+        <div class="pin-dot" id="pd0"></div>
+        <div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div>
+        <div class="pin-dot" id="pd3"></div>
+        <div class="pin-dot" id="pd4"></div>
+        <div class="pin-dot" id="pd5"></div>
+      </div>
+      <div style="text-align:center;font-size:.78rem;color:var(--txs);margin-bottom:14px">Enter 6-digit MPIN</div>
+
+      <!-- NUMBER PAD — FIXED -->
+      <div id="numpad" class="numpad">
+        <button class="npk" data-v="1">1</button>
+        <button class="npk" data-v="2">2</button>
+        <button class="npk" data-v="3">3</button>
+        <button class="npk" data-v="4">4</button>
+        <button class="npk" data-v="5">5</button>
+        <button class="npk" data-v="6">6</button>
+        <button class="npk" data-v="7">7</button>
+        <button class="npk" data-v="8">8</button>
+        <button class="npk" data-v="9">9</button>
+        <button class="npk del" data-v="del">⌫</button>
+        <button class="npk" data-v="0">0</button>
+        <button class="npk ok" data-v="ok">✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="mod-ok">
+  <div class="modal">
+    <div class="modal-header" style="justify-content:flex-end">
+      <button class="modal-close" onclick="handleSuccessClose()">✕</button>
+    </div>
+    <div class="success-wave">
+      <div class="success-check">✅</div>
+      <div class="success-title">Payment Successful!</div>
+      <div class="success-amt" id="ok-amt">₹0</div>
+      <div class="success-to" id="ok-to">—</div>
+      <div class="success-meta" id="ok-meta"></div>
+      <button class="btn-p" onclick="handleSuccessClose()">Done 👍</button>
+    </div>
+  </div>
+</div>
+
+<!-- MPIN CHANGE MODAL -->
+<div class="modal-overlay" id="mod-mpin-change">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Change MPIN</div>
+      <button class="modal-close" onclick="closeMod('mod-mpin-change')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label>Current MPIN</label><div class="orow" id="cur-mpin-row"></div></div>
+      <div class="fg"><label>New MPIN</label><div class="orow" id="new-mpin-row"></div></div>
+      <div class="fg"><label>Confirm New MPIN</label><div class="orow" id="conf-mpin-row"></div></div>
+      <button class="btn-p" onclick="changeMPIN()">Update MPIN</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
