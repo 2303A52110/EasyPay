@@ -95,6 +95,34 @@ EasyAI is a context-aware banking assistant powered by **OpenRouter API** that:
 
 ---
 
+## 📸 Screenshots
+
+### 🏠 Dashboard
+<img width="2400" height="1300" alt="image" src="https://github.com/user-attachments/assets/00aa20c6-23d4-46ed-b6c8-784abaf8d1f2" />
+
+
+### 💸 Send Money
+<img width="2400" height="1300" alt="image" src="https://github.com/user-attachments/assets/1d500375-f2ce-4d68-b68d-63789fc224ea" />
+
+
+### 🤖 Loan EMI
+<img width="2400" height="1300" alt="image" src="https://github.com/user-attachments/assets/65f5cabe-f272-42cf-ba43-11f087b38797" />
+
+
+### 🗂️ Transaction History
+<img width="2400" height="1300" alt="image" src="https://github.com/user-attachments/assets/8c9d1bf8-dff3-49de-bafb-01dd3a4a4b71" />
+
+
+### 🗨️ Chat & Pay
+<img width="2400" height="1300" alt="image" src="https://github.com/user-attachments/assets/e23d2427-a360-43e0-b3ab-fd12ed7fb794" />
+
+
+### 📱 Recharge
+<img width="2400" height="1300" alt="image" src="https://github.com/user-attachments/assets/9b9de377-f402-44a5-b123-67a93be6abae" />
+
+
+---
+
 ## ⚠️ Limitations
 
 - Dependent on external API availability
