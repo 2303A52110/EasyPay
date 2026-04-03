@@ -31,8 +31,8 @@ It provides a simple and interactive interface for users to perform simulated tr
 - 📲 **Scan & Pay** — QR code payment simulation
 - ⚙️ **Settings** — Profile management, MPIN change & fingerprint setup
 
-'''
-
+---
+```
 ## 🏗️ System Architecture
 
 [User Input]
@@ -51,9 +51,9 @@ It provides a simple and interactive interface for users to perform simulated tr
    │
    ▼
 [UI Response]
-
-'''
-
+```
+---
+```
 ## 🛠️ Tech Stack
 
 Layer        : Technology
@@ -64,8 +64,9 @@ AI Engine    : OpenRouter API (LLM)
 Storage      : Browser localStorage
 Fonts        : Google Fonts (Inter, JetBrains Mono)
 Deployment   : GitHub Pages
-
-
+```
+---
+```
 ## 📁 Project Structure
 
 EasyPay/
@@ -80,6 +81,8 @@ EasyPay/
 ├── app.js                # Express backend + AI proxy
 ├── package.json          # Dependencies
 └── README.md
+```
+---
 
 ## 🤖 EasyAI — Money Assistant
 
