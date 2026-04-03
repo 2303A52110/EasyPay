@@ -35,53 +35,53 @@ It provides a simple and interactive interface for users to perform simulated tr
 
 ## 🏗️ System Architecture
 
-[User Input]
-      │
+[User Input]                                                              
+      │                                                                                            
       ▼
-[Frontend: HTML/CSS/JS]
-      │
-      ▼
-[localStorage: State Management]
-      │
-      ▼
-[Backend: Express (app.js)]
-      │
-      ▼
-[OpenRouter API (EasyAI)]
-      │
-      ▼
-[UI Response]
+[Frontend: HTML/CSS/JS]                                                                               
+      │                                                                                          
+      ▼                                                                                                         
+[localStorage: State Management]                                                                                                
+      │                                                                                        
+      ▼                                                                                                        
+[Backend: Express (app.js)]                                                                          
+      │                                                                                 
+      ▼                                                                                                          
+[OpenRouter API (EasyAI)]                                                                                                 
+      │                                                                                                    
+      ▼                                                                                                          
+[UI Response]                                                                                                        
 
 ---
 
 ## 🛠️ Tech Stack
 
-Layer        : Technology
------------- : ----------------------------------
-Frontend     : HTML5, CSS3, JavaScript (ES6+)
-Backend      : Node.js, Express
-AI Engine    : OpenRouter API (LLM)
-Storage      : Browser localStorage
-Fonts        : Google Fonts (Inter, JetBrains Mono)
-Deployment   : GitHub Pages
+Layer        : Technology                                                                                                            
+------------ : ----------------------------------                                                                            
+Frontend     : HTML5, CSS3, JavaScript (ES6+)                                                                                       
+Backend      : Node.js, Express                                                                                            
+AI Engine    : OpenRouter API (LLM)                                                                                         
+Storage      : Browser localStorage                                                                                               
+Fonts        : Google Fonts (Inter, JetBrains Mono)                                                                        
+Deployment   : GitHub Pages                                                                               
 
 ---
 
 ## 📁 Project Structure
 
-EasyPay/
-│
-├── public/
-│   ├── index.html        # Single Page Application
-│   ├── css/
-│   │   └── style.css     # Styles & animations
-│   ├── js/
-│   │   └── app.js        # Frontend logic
-│
-├── app.js                # Express backend + AI proxy
-├── package.json          # Dependencies
-└── README.md
-
+EasyPay/                                                                                                  
+│                                                                                            
+├── public/                                                                                            
+│   ├── index.html        # Single Page Application                                                                                            
+│   ├── css/                                                                                            
+│   │   └── style.css     # Styles & animations                                                                                            
+│   ├── js/                                                                                            
+│   │   └── app.js        # Frontend logic                                                                                            
+│                                                                                            
+├── app.js                # Express backend + AI proxy                                                                                            
+├── package.json          # Dependencies                                                                                            
+└── README.md                                                                                            
+                                                                                            
 ---
 
 ## 🤖 EasyAI — Money Assistant
